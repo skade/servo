@@ -79,9 +79,9 @@ use layout_interface::{HitTestResponse, MouseOverResponse};
 use layout_interface::{LayoutChan, Msg};
 use layout_interface::{ReflowGoal, ReflowQueryType};
 use msg::compositor_msg::ScriptToCompositorMsg;
-use msg::constellation_msg::AnimationState;
 use msg::constellation_msg::Msg as ConstellationMsg;
 use msg::constellation_msg::{ALT, CONTROL, SHIFT, SUPER};
+use msg::constellation_msg::{AnimationState, PipelineId};
 use msg::constellation_msg::{ConstellationChan, FocusType, Key, KeyModifiers, KeyState, MozBrowserEvent, SubpageId};
 use net_traits::ControlMsg::{GetCookiesForUrl, SetCookiesForUrl};
 use net_traits::CookieSource::NonHTTP;
@@ -1264,6 +1264,14 @@ impl Document {
             .traverse_preorder()
             .filter_map(Root::downcast::<HTMLIFrameElement>)
             .find(|node| node.subpage_id() == Some(subpage_id))
+    }
+
+    /// Find an iframe element in the document.
+    pub fn find_iframe_by_pipeline(&self, pipeline: PipelineId) -> Option<Root<HTMLIFrameElement>> {
+        self.upcast::<Node>()
+            .traverse_preorder()
+            .filter_map(Root::downcast::<HTMLIFrameElement>)
+            .find(|node| node.pipeline() == Some(pipeline))
     }
 
     pub fn get_dom_loading(&self) -> u64 {
